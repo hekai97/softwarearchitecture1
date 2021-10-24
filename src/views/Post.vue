@@ -4,7 +4,39 @@
       <el-container>
         <el-aside width="200px">Aside</el-aside>
         <el-container>
-          <el-main>Main</el-main>
+          <el-main>
+            <div class="content">
+              <div class="up">
+                <div class="post-title">
+                  <h3 style="text-align:left">{{PostData.postTopic}}</h3>
+                  <el-divider></el-divider>
+                </div>
+              </div>
+              <div class="down">
+                <div class="left">
+                </div>
+                <div class="right">
+                  <div class="post-content">
+                    {{PostData.postContent}}
+                  </div>
+                  <div class="detail"></div>
+                </div>
+              </div>
+            </div>
+            <div class="reply-div">
+              <ul id="all-reply">
+                <li
+                >
+                  <div class="per-reply">
+                    <div class="left"></div>
+                    <div class="right">
+                      <!-- {{item}} -->
+                      </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </el-main>
           <el-footer>Footer</el-footer>
         </el-container>
         <el-aside width="200px">Aside</el-aside>
@@ -17,7 +49,8 @@ export default{
     data(){
         return{
             id:this.$route.params.PostID,
-            PostData:[]
+            PostData:null,
+            replyData:null,
         }
     },
     methods:{
@@ -25,21 +58,35 @@ export default{
             this.$router.push('/');
         },
         getPost(id){
-            const _this=this;
             this.$axios
-            .post("http://localhost:8081/Posts/getPostById/"+id)
-            .then((res)=>{
-                _this.PostData=res.data;
-                console.log(_this.PostData);
-            }).catch(function(error){
+              .post("http://localhost:8081/Posts/getPostById/"+id)
+              .then((res) => {
+                console.log("获取成功");
+                this.PostData = res.data;
+              })
+              .catch(function (error) {
                 console.log(error);
-            })
+              });
+        },
+        getAllReply(id){
+            this.$axios.post("http://localhost:8081/Reply/getAllReplyByPostId/"+id)
+            .then((res) => {
+                console.log("获取成功");
+                this.replyData = res.data;
+                console.log(this.replyData);
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
         },
     },
-    created(){
-        console.log(this.$route.params.PostID);
-        this.getPost(this.id);
-    }
+    mounted() {
+      this.getPost(this.id);
+      // this.getAllReply(this.id);
+    },
+    // created(){
+    //     this.parallelfunction();
+    // }
 }
 </script>
 
@@ -65,7 +112,7 @@ export default{
   background-color: #e9eef3;
   color: var(--el-text-color-primary);
   text-align: center;
-  line-height: 160px;
+  /* line-height: 160px; */
 }
 
 body > .el-container {
@@ -79,5 +126,28 @@ body > .el-container {
 
 .el-container:nth-child(7) .el-aside {
   line-height: 320px;
+}
+li {
+  list-style: none;
+}
+.down{
+  display: flex;
+}
+.left{
+  width: 20%;
+}
+.right{
+  width: 80%;
+}
+.post-title{
+  /* height: 20px; */
+  text-align: justify;
+}
+.post-content{
+  text-align: justify;
+  height:auto !important;
+  height:240px;
+  min-height:240px;
+  border: solid 1px;
 }
 </style>

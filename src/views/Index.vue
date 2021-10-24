@@ -120,12 +120,11 @@ export default {
   },
   methods: {
     getUsers() {
-      const _this = this;
-      _this.$axios
+      this.$axios
         .post("http://localhost:8081/Posts/getPostsPreview")
         .then((res) => {
           console.log("获取成功");
-          _this.tableData = res.data;
+          this.tableData = res.data;
         })
         .catch(function (error) {
           console.log(error);
