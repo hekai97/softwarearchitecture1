@@ -1,5 +1,5 @@
 <template>
-    <el-container>
+    <el-container id="Posts">
       <el-header>Header</el-header>
       <el-container>
         <el-aside width="200px">Aside</el-aside>
@@ -8,7 +8,7 @@
             <div class="content">
               <div class="up">
                 <div class="post-title">
-                  <h3 style="text-align:left">{{PostData.postTopic}}</h3>
+                  <h3 style="text-align:left">{{data.PostData.postTopic}}</h3>
                   <el-divider></el-divider>
                 </div>
               </div>
@@ -16,8 +16,8 @@
                 <div class="left">
                 </div>
                 <div class="right">
-                  <div class="post-content">
-                    {{PostData.postContent}}
+                  <div class="post-content" @click="printmyData()">
+                    {{data.PostData.postContent}}
                   </div>
                   <div class="detail"></div>
                 </div>
@@ -25,12 +25,16 @@
             </div>
             <div class="reply-div">
               <ul id="all-reply">
-                <li
+                <li 
+                :class="[curId == item.replyId ? 'active' : '']"
+                v-for="item in data.replyData"
+                :key="item.replyId"
                 >
                   <div class="per-reply">
                     <div class="left"></div>
                     <div class="right">
-                      <!-- {{item}} -->
+                      {{item.replyContent}}
+                      
                       </div>
                   </div>
                 </li>
@@ -45,48 +49,100 @@
 </template>
 
 <script>
+import { reactive } from "vue"
+import axios from "axios"
+import {useRoute} from 'vue-router';
+
 export default{
-    data(){
-        return{
-            id:this.$route.params.PostID,
-            PostData:null,
-            replyData:null,
-        }
-    },
-    methods:{
-        back(){
-            this.$router.push('/');
-        },
-        getPost(id){
-            this.$axios
-              .post("http://localhost:8081/Posts/getPostById/"+id)
-              .then((res) => {
-                console.log("获取成功");
-                this.PostData = res.data;
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
-        },
-        getAllReply(id){
-            this.$axios.post("http://localhost:8081/Reply/getAllReplyByPostId/"+id)
-            .then((res) => {
-                console.log("获取成功");
-                this.replyData = res.data;
-                console.log(this.replyData);
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
-        },
-    },
-    mounted() {
-      this.getPost(this.id);
-      // this.getAllReply(this.id);
-    },
-    // created(){
-    //     this.parallelfunction();
-    // }
+//     data(){
+//         return{
+//             id:this.$route.params.PostID,
+//             PostData:[],
+//             replyData:[],
+//         }
+//     },
+//     methods:{
+//         back(){
+//             this.$router.push('/');
+//         },
+//         getPost(id){
+//              this.$axios
+//               .post("http://localhost:8081/Posts/getPostById/"+id)
+//               .then((res) => {
+//                 console.log("获取成功");
+//                 this.PostData = res.data;
+//                 console.log(this.PostData);
+//               })
+//               .catch(function (error) {
+//                 console.log(error);
+//               });
+//         },
+//         getAllReply(id){
+//             this.$axios.post("http://localhost:8081/Reply/getAllReplyByPostId/"+id)
+//             .then((res) => {
+//                 console.log("获取成功");
+//                 this.replyData = res.data;
+//                 console.log(this.replyData);
+//                 console.log(this.replyData);
+//               })
+//               .catch(function (error) {
+//                 console.log(error);
+//               });
+//         },
+//         init(){
+//         console.log(this.id1);
+//         }
+//     },
+//     created(){
+//       this.$axios.all([this.$axios.post("http://localhost:8081/Reply/getAllReplyByPostId/"+this.id),
+//       this.$axios.post("http://localhost:8081/Posts/getPostById/"+this.id)])
+//       .then(this.$axios.spread(function(allTask, allCity){
+//         console.log('所有请求完成');
+//         this.PostData=allTask.data;
+//         this.replyData=allCity.data;
+//     }))
+//     },
+//     mounted(){
+//       this.init();
+//     }
+  name:'Posts',
+  setup(){
+    let data=reactive({
+      id:5,
+      PostData:[],
+      replyData:[],
+    })
+    getAll();
+    // onMounted(()=> {
+    //     getAll();
+    //     printmyData();
+    //   // axios.post("http://localhost:8081/Posts/getPostById/",data.id).then((res)=>{
+    //   //   data.PostData=res.data;
+    //   // })
+    //   // axios.post("http://localhost:8081/Reply/getAllReplyByPostId/",data.id).then((res)=>{
+    //   //   data.replyData=res.data;
+    //   // })
+    //   })
+      return{data,printmyData}
+
+      function getAll(){
+        const route=useRoute();
+        data.id=parseInt(route.params.PostID);
+        console.log(data.id);
+        axios.all([axios.post("http://localhost:8081/Posts/getPostById/"+data.id),
+                   axios.post("http://localhost:8081/Reply/getAllReplyByPostId/"+data.id)])
+        .then(axios.spread(function(allTask, allCity){
+          console.log('所有请求完成');
+          data.PostData=allTask.data;
+          data.replyData=allCity.data;
+      }))
+      }
+      function printmyData(){
+        console.log(data.id);
+        console.log(data.PostData);
+        console.log(data.replyData);
+      }
+  }
 }
 </script>
 
