@@ -205,5 +205,6 @@ li {
   height:240px;
   min-height:240px;
   border: solid 1px;
+    padding: 10px 10px;
 }
 </style>
